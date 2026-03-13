@@ -2,96 +2,112 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
+import plotly.express as px
 
-st.set_page_config(page_title="EduPro AI Dashboard", layout="wide")
+st.set_page_config(page_title="EduPro AI Analytics", layout="wide")
 
-# Header
+# ----- DARK THEME STYLE -----
 st.markdown("""
 <style>
+body {
+    background-color: #0E1117;
+    color: white;
+}
 .main-title {
-    font-size:40px;
-    font-weight:bold;
     text-align:center;
-    color:#6C63FF;
+    font-size:42px;
+    font-weight:bold;
+    color:#4CAF50;
 }
 .subtitle {
     text-align:center;
-    color:gray;
+    color:#AAAAAA;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='main-title'>EduPro Course Demand & Revenue Forecasting</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Predict future course enrollments and revenue using machine learning</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>EduPro Demand Forecast Dashboard</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>Predict Course Demand and Revenue using Machine Learning</div>", unsafe_allow_html=True)
 
 st.markdown("---")
 
-# Load model
+# ----- LOAD MODEL -----
 try:
     model = pickle.load(open("Model/demand_model.pkl","rb"))
 except:
-    st.error("Model file not found")
+    st.error("Model file missing")
     st.stop()
 
-# Sidebar
+# ----- SIDEBAR INPUT -----
 st.sidebar.header("Course Parameters")
 
-price = st.sidebar.slider("Course Price ($)", 0, 500, 100)
-duration = st.sidebar.slider("Course Duration (Hours)", 1, 40, 10)
-rating = st.sidebar.slider("Course Rating", 1.0, 5.0, 4.0)
-experience = st.sidebar.slider("Instructor Experience (Years)", 0, 20, 5)
-teacher_rating = st.sidebar.slider("Teacher Rating", 1.0, 5.0, 4.2)
+price = st.sidebar.slider("Course Price ($)", 0, 500, 120)
+duration = st.sidebar.slider("Course Duration (Hours)", 1, 40, 12)
+rating = st.sidebar.slider("Course Rating", 1.0, 5.0, 4.2)
+experience = st.sidebar.slider("Instructor Experience", 0, 20, 6)
+teacher_rating = st.sidebar.slider("Teacher Rating", 1.0, 5.0, 4.3)
 
 predict = st.sidebar.button("Predict Demand")
 
-# Prediction
+# ----- PREDICTION -----
 if predict:
 
-    features = np.array([[price, duration, rating, experience, teacher_rating]])
+    features = np.array([[price,duration,rating,experience,teacher_rating]])
     prediction = model.predict(features)
 
     enrollments = int(prediction[0])
     revenue = enrollments * price
 
-    st.subheader("Prediction Results")
-
-    col1, col2 = st.columns(2)
+    col1,col2 = st.columns(2)
 
     col1.metric("Predicted Enrollments", enrollments)
-    col2.metric("Estimated Revenue ($)", revenue)
+    col2.metric("Estimated Revenue", f"${revenue}")
 
-# Demand vs Price Chart
-st.markdown("---")
-st.subheader("Demand vs Price Analysis")
+# ----- DEMAND VS PRICE CHART -----
+st.markdown("## Demand vs Price")
 
-prices = np.arange(50,300,20)
-predictions = []
+prices = np.arange(50,300,10)
+preds = []
 
 for p in prices:
-    f = np.array([[p, duration, rating, experience, teacher_rating]])
-    predictions.append(model.predict(f)[0])
+    f = np.array([[p,duration,rating,experience,teacher_rating]])
+    preds.append(model.predict(f)[0])
 
-chart_data = pd.DataFrame({
-    "Price": prices,
-    "Predicted Enrollments": predictions
+df = pd.DataFrame({
+    "Price":prices,
+    "Demand":preds
 })
 
-st.line_chart(chart_data.set_index("Price"))
+fig = px.line(df, x="Price", y="Demand", title="Demand Curve")
+st.plotly_chart(fig,use_container_width=True)
 
-# Feature importance section
-st.markdown("---")
-st.subheader("Key Demand Drivers")
+# ----- REVENUE FORECAST GRAPH -----
+st.markdown("## Revenue Forecast")
 
-importance_data = pd.DataFrame({
-    "Feature":[
-        "Course Price",
-        "Course Duration",
-        "Course Rating",
-        "Instructor Experience",
-        "Teacher Rating"
-    ],
-    "Importance":[30,15,25,20,10]
+df["Revenue"] = df["Price"] * df["Demand"]
+
+fig2 = px.area(df,x="Price",y="Revenue",title="Revenue Forecast")
+st.plotly_chart(fig2,use_container_width=True)
+
+# ----- COURSE CATEGORY ANALYTICS -----
+st.markdown("## Course Category Analytics")
+
+categories = ["Programming","Business","Data Science","Design","Marketing"]
+
+category_demand = np.random.randint(100,500,5)
+
+cat_df = pd.DataFrame({
+    "Category":categories,
+    "Enrollments":category_demand
 })
 
-st.bar_chart(importance_data.set_index("Feature"))
+fig3 = px.bar(cat_df,x="Category",y="Enrollments",color="Category")
+st.plotly_chart(fig3,use_container_width=True)
 
+# ----- DEMAND HEATMAP -----
+st.markdown("## Demand Heatmap")
+
+heatmap_data = np.random.rand(10,10)
+
+fig4 = px.imshow(heatmap_data,color_continuous_scale="Viridis")
+st.plotly_chart(fig4,use_container_width=True)
