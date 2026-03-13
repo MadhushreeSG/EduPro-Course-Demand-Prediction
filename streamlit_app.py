@@ -5,7 +5,7 @@ import pickle
 
 st.set_page_config(page_title="EduPro AI Dashboard", layout="wide")
 
-# ---------- Header ----------
+# Header
 st.markdown("""
 <style>
 .main-title {
@@ -21,19 +21,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='main-title'>EduPro AI Demand Forecast Dashboard</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Predict Course Enrollments and Revenue using Machine Learning</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>EduPro Course Demand & Revenue Forecasting</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>Predict future course enrollments and revenue using machine learning</div>", unsafe_allow_html=True)
 
 st.markdown("---")
 
-# ---------- Load Model ----------
+# Load model
 try:
     model = pickle.load(open("Model/demand_model.pkl","rb"))
 except:
     st.error("Model file not found")
     st.stop()
 
-# ---------- Sidebar ----------
+# Sidebar
 st.sidebar.header("Course Parameters")
 
 price = st.sidebar.slider("Course Price ($)", 0, 500, 100)
@@ -44,7 +44,7 @@ teacher_rating = st.sidebar.slider("Teacher Rating", 1.0, 5.0, 4.2)
 
 predict = st.sidebar.button("Predict Demand")
 
-# ---------- Prediction ----------
+# Prediction
 if predict:
 
     features = np.array([[price, duration, rating, experience, teacher_rating]])
@@ -55,13 +55,12 @@ if predict:
 
     st.subheader("Prediction Results")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     col1.metric("Predicted Enrollments", enrollments)
-    col2.metric("Estimated Revenue", f"${revenue}")
-    col3.metric("Course Rating", rating)
+    col2.metric("Estimated Revenue ($)", revenue)
 
-# ---------- Price vs Demand Chart ----------
+# Demand vs Price Chart
 st.markdown("---")
 st.subheader("Demand vs Price Analysis")
 
@@ -79,7 +78,7 @@ chart_data = pd.DataFrame({
 
 st.line_chart(chart_data.set_index("Price"))
 
-# ---------- Feature Importance (Example) ----------
+# Feature importance section
 st.markdown("---")
 st.subheader("Key Demand Drivers")
 
@@ -95,14 +94,4 @@ importance_data = pd.DataFrame({
 })
 
 st.bar_chart(importance_data.set_index("Feature"))
-
-# ---------- Dataset Preview ----------
-st.markdown("---")
-st.subheader("Dataset Preview")
-
-try:
-    data = pd.read_excel("data/EduPro_Online_Platform.xlsx")
-    st.dataframe(data.head())
-except:
-    st.info("Dataset preview unavailable")
 
