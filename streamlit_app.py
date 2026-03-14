@@ -17,7 +17,7 @@ body {
 
 .main-title {
     text-align:center;
-    font-size:42px;
+    font-size:38px;
     font-weight:bold;
     color:#4CAF50;
 }
@@ -25,7 +25,7 @@ body {
 .subtitle {
     text-align:center;
     color:#AAAAAA;
-    font-size:18px;
+    font-size:16px;
 }
 
 [data-testid="metric-container"] {
@@ -42,7 +42,7 @@ body {
 """, unsafe_allow_html=True)
 
 # ---------------- TITLE ----------------
-st.markdown("<div class='main-title'>EduPro Demand Forecast Dashboard</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title'>Predictive Modeling for Course Demand and Revenue Forecasting on EduPro</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtitle'>Predict Course Demand and Revenue using Machine Learning</div>", unsafe_allow_html=True)
 
 st.markdown("---")
@@ -71,10 +71,8 @@ revenue = 0
 
 # ---------------- PREDICTION ----------------
 if predict:
-
     features = np.array([[price,duration,rating,experience,teacher_rating]])
     prediction = model.predict(features)
-
     enrollments = int(prediction[0])
     revenue = enrollments * price
 
@@ -93,12 +91,9 @@ tab1,tab2,tab3 = st.tabs(["Demand Analysis","Revenue Forecast","Course Analytics
 
 # ---------------- DEMAND ANALYSIS ----------------
 with tab1:
-
     st.subheader("Demand vs Price")
-
     prices = np.arange(50,300,10)
     preds = []
-
     for p in prices:
         f = np.array([[p,duration,rating,experience,teacher_rating]])
         preds.append(model.predict(f)[0])
@@ -122,9 +117,7 @@ with tab1:
 
 # ---------------- REVENUE FORECAST ----------------
 with tab2:
-
     st.subheader("Revenue Forecast")
-
     df["Revenue"] = df["Price"] * df["Demand"]
 
     fig2 = px.area(
@@ -140,11 +133,8 @@ with tab2:
 
 # ---------------- COURSE ANALYTICS ----------------
 with tab3:
-
     st.subheader("Course Category Analytics")
-
     categories = ["Programming","Business","Data Science","Design","Marketing"]
-
     category_demand = np.random.randint(100,500,5)
 
     cat_df = pd.DataFrame({
@@ -170,7 +160,6 @@ with tab3:
     st.plotly_chart(fig3,use_container_width=True)
 
     st.subheader("Demand Heatmap")
-
     heatmap_data = np.random.rand(10,10)
 
     fig4 = px.imshow(
@@ -180,4 +169,3 @@ with tab3:
     )
 
     st.plotly_chart(fig4,use_container_width=True)
-
