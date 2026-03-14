@@ -34,10 +34,6 @@ body {
     padding:15px;
     border-radius:10px;
 }
-
-.block-container {
-    padding-top:2rem;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -90,25 +86,15 @@ col2.metric("Estimated Revenue", f"${revenue}")
 col3.metric("Course Rating", rating)
 col4.metric("Course Price", f"${price}")
 
-# ---------------- AI INSIGHTS ----------------
-if enrollments > 300:
-    st.info("High demand expected. Consider increasing course price.")
-
-elif enrollments > 150:
-    st.info("Moderate demand predicted. Current pricing looks balanced.")
-
-elif enrollments > 0:
-    st.warning("Low demand predicted. Try reducing price or improving ratings.")
-
 st.markdown("---")
 
 # ---------------- TABS ----------------
-tab1,tab2,tab3 = st.tabs(["Demand Analysis","Revenue Forecast","Course Analytics"])
+tab1,tab2 = st.tabs(["Demand & Revenue","Course Analytics"])
 
-# ---------------- DEMAND ANALYSIS ----------------
+# ---------------- DEMAND + REVENUE ----------------
 with tab1:
 
-    st.subheader("Demand vs Price")
+    col1, col2 = st.columns(2)
 
     prices = np.arange(50,300,10)
     preds = []
@@ -122,23 +108,21 @@ with tab1:
         "Demand":preds
     })
 
+    # DEMAND GRAPH
     fig = px.line(
         df,
         x="Price",
         y="Demand",
-        title="Demand Curve",
         markers=True,
         template="plotly_dark",
         color_discrete_sequence=["#FFD700"]
     )
 
-    st.plotly_chart(fig,use_container_width=True)
+    fig.update_layout(height=400)
 
-# ---------------- REVENUE FORECAST ----------------
-with tab2:
+    col1.plotly_chart(fig,use_container_width=True)
 
-    st.subheader("Revenue Forecast")
-
+    # REVENUE GRAPH
     df["Revenue"] = df["Price"] * df["Demand"]
 
     fig2 = px.area(
@@ -146,16 +130,17 @@ with tab2:
         x="Price",
         y="Revenue",
         template="plotly_dark",
-        color_discrete_sequence=["#FF4B4B"],
-        title="Revenue Forecast"
+        color_discrete_sequence=["#FF4B4B"]
     )
 
-    st.plotly_chart(fig2,use_container_width=True)
+    fig2.update_layout(height=400)
 
-# ---------------- COURSE ANALYTICS ----------------
-with tab3:
+    col2.plotly_chart(fig2,use_container_width=True)
 
-    st.subheader("Course Category Analytics")
+# ---------------- ANALYTICS ----------------
+with tab2:
+
+    col1,col2 = st.columns(2)
 
     categories = ["Programming","Business","Data Science","Design","Marketing"]
 
@@ -171,19 +156,12 @@ with tab3:
         x="Category",
         y="Enrollments",
         color="Category",
-        template="plotly_dark",
-        color_discrete_sequence=[
-            "#00E5FF",
-            "#FFD700",
-            "#FF4B4B",
-            "#7C4DFF",
-            "#00C853"
-        ]
+        template="plotly_dark"
     )
 
-    st.plotly_chart(fig3,use_container_width=True)
+    fig3.update_layout(height=400)
 
-    st.subheader("Demand Heatmap")
+    col1.plotly_chart(fig3,use_container_width=True)
 
     heatmap_data = np.random.rand(10,10)
 
@@ -193,5 +171,7 @@ with tab3:
         color_continuous_scale="Turbo"
     )
 
-    st.plotly_chart(fig4,use_container_width=True)
+    fig4.update_layout(height=400)
+
+    col2.plotly_chart(fig4,use_container_width=True)
 
