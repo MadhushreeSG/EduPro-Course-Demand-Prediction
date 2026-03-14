@@ -54,7 +54,7 @@ except:
     st.error("Model file missing")
     st.stop()
 
-# ---------------- SIDEBAR ----------------
+# ---------------- SIDEBAR INPUT ----------------
 st.sidebar.header("Course Parameters")
 
 price = st.sidebar.slider("Course Price ($)",0,500,120)
@@ -72,11 +72,15 @@ revenue = 0
 # ---------------- PREDICTION ----------------
 if predict:
 
-    features = np.array([[price,duration,rating,experience,teacher_rating]])
-    prediction = model.predict(features)
+    with st.spinner("AI Model Predicting Demand..."):
 
-    enrollments = int(prediction[0])
-    revenue = enrollments * price
+        features = np.array([[price,duration,rating,experience,teacher_rating]])
+        prediction = model.predict(features)
+
+        enrollments = int(prediction[0])
+        revenue = enrollments * price
+
+    st.success("Prediction Complete")
 
 # ---------------- KPI CARDS ----------------
 col1,col2,col3,col4 = st.columns(4)
@@ -85,6 +89,16 @@ col1.metric("Predicted Enrollments", enrollments)
 col2.metric("Estimated Revenue", f"${revenue}")
 col3.metric("Course Rating", rating)
 col4.metric("Course Price", f"${price}")
+
+# ---------------- AI INSIGHTS ----------------
+if enrollments > 300:
+    st.info("High demand expected. Consider increasing course price.")
+
+elif enrollments > 150:
+    st.info("Moderate demand predicted. Current pricing looks balanced.")
+
+elif enrollments > 0:
+    st.warning("Low demand predicted. Try reducing price or improving ratings.")
 
 st.markdown("---")
 
@@ -181,6 +195,3 @@ with tab3:
 
     st.plotly_chart(fig4,use_container_width=True)
 
-# ---------------- FOOTER ----------------
-st.markdown("---")
-st.markdown("Built with ❤️ using Streamlit & Machine Learning")
